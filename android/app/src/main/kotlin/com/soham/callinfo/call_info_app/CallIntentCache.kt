@@ -1,5 +1,6 @@
 package com.soham.callinfo.call_info_app
 
+import android.content.Context
 import android.content.Intent
 
 object CallIntentCache {
@@ -9,8 +10,9 @@ object CallIntentCache {
 
     private var pendingPayload: Map<String, Any?>? = null
 
-    fun fromIntent(intent: Intent): Map<String, Any?>? {
+    fun fromIntent(context: Context, intent: Intent): Map<String, Any?>? {
         val number = intent.getStringExtra(EXTRA_PHONE_NUMBER)
+            ?: CallDetailsStore.getLastNumber(context)
         val callState = intent.getStringExtra(EXTRA_CALL_STATE)
         if (number.isNullOrEmpty()) {
             return null

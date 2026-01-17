@@ -16,6 +16,10 @@ class PhoneCallReceiver : BroadcastReceiver() {
         val incomingNumber = intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER)
         val timestamp = System.currentTimeMillis()
 
+        if (!incomingNumber.isNullOrEmpty()) {
+            CallDetailsStore.saveLastNumber(context, incomingNumber)
+        }
+
         val payload = mapOf(
             CallIntentCache.EXTRA_PHONE_NUMBER to incomingNumber,
             CallIntentCache.EXTRA_CALL_STATE to state,
@@ -39,10 +43,11 @@ class PhoneCallReceiver : BroadcastReceiver() {
             TelephonyManager.EXTRA_STATE_IDLE -> {
                 if (CallStateTracker.pendingNotificationWithoutNumber) {
                     // If the number wasn't available during ringing, notify after the call ends
-                    // so the user can open the app and manually search.
+                    // and attach the last known number so the app can open details when possible.
+                    val lastKnown = CallDetailsStore.getLastNumber(context)
                     CallNotificationHelper.showCallerDetailsNotification(
                         context,
-                        null,
+                        lastKnown,
                         state
                     )
                 }

@@ -45,6 +45,7 @@ class MainActivity : FlutterActivity() {
 
     override fun getInitialRoute(): String {
         val number = intent.getStringExtra(CallIntentCache.EXTRA_PHONE_NUMBER)
+            ?: CallDetailsStore.getLastNumber(this)
         return if (!number.isNullOrEmpty()) {
             "/caller?number=${Uri.encode(number)}"
         } else {
@@ -55,7 +56,7 @@ class MainActivity : FlutterActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        val payload = CallIntentCache.fromIntent(intent)
+        val payload = CallIntentCache.fromIntent(this, intent)
         if (payload != null) {
             if (intentChannel != null) {
                 intentChannel?.invokeMethod("openCallerDetails", payload)
