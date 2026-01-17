@@ -1,12 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- 📞 Required permissions -->
+    <!-- Minimal permissions for call state detection and notifications. -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.READ_CALL_LOG" />
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-
-    <!-- Android 10+ needs this for background services -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:label="call_info_app"
@@ -34,7 +30,7 @@
             </intent-filter>
         </activity>
 
-        <!-- 📡 Incoming call receiver -->
+        <!-- 📡 Call state receiver (no overlays, no call log access). -->
         <receiver
             android:name=".PhoneCallReceiver"
             android:enabled="true"
@@ -43,13 +39,6 @@
                 <action android:name="android.intent.action.PHONE_STATE" />
             </intent-filter>
         </receiver>
-
-        <!-- 🪟 Overlay service -->
-        <service
-            android:name=".CallerOverlayService"
-            android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="phoneCall" />
 
         <!-- Flutter embedding -->
         <meta-data
