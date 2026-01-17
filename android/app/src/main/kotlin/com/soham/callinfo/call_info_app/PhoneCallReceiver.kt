@@ -4,32 +4,52 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.telephony.TelephonyManager
-import android.util.Log
 
 class PhoneCallReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action != TelephonyManager.ACTION_PHONE_STATE_CHANGED) {
+            return
+        }
 
-        if (intent.action == TelephonyManager.ACTION_PHONE_STATE_CHANGED) {
+        val state = intent.getStringExtra(TelephonyManager.EXTRA_STATE) ?: return
+        val incomingNumber = intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER)
+        val timestamp = System.currentTimeMillis()
 
-            val state = intent.getStringExtra(TelephonyManager.EXTRA_STATE)
-            val incomingNumber =
-                intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER)
+        val payload = mapOf(
+            CallIntentCache.EXTRA_PHONE_NUMBER to incomingNumber,
+            CallIntentCache.EXTRA_CALL_STATE to state,
+            CallIntentCache.EXTRA_TIMESTAMP to timestamp
+        )
 
-            if (state == TelephonyManager.EXTRA_STATE_RINGING) {
-                Log.d("CALL_POC", "Incoming call: $incomingNumber")
+        // Send call state updates to Flutter via EventChannel.
+        CallEventBridge.sendEvent(payload)
 
-                val serviceIntent =
-                    Intent(context, CallerOverlayService::class.java)
-                serviceIntent.putExtra("number", incomingNumber)
-
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                    context.startForegroundService(serviceIntent)
-                } else {
-                    context.startService(serviceIntent)
+        when (state) {
+            TelephonyManager.EXTRA_STATE_RINGING -> {
+                CallStateTracker.pendingNotificationWithoutNumber = incomingNumber.isNullOrEmpty()
+                if (!incomingNumber.isNullOrEmpty()) {
+                    CallNotificationHelper.showCallerDetailsNotification(
+                        context,
+                        incomingNumber,
+                        state
+                    )
                 }
-
+            }
+            TelephonyManager.EXTRA_STATE_IDLE -> {
+                if (CallStateTracker.pendingNotificationWithoutNumber) {
+                    // If the number wasn't available during ringing, notify after the call ends
+                    // so the user can open the app and manually search.
+                    CallNotificationHelper.showCallerDetailsNotification(
+                        context,
+                        null,
+                        state
+                    )
+                }
+                CallStateTracker.pendingNotificationWithoutNumber = false
             }
         }
+
+        CallStateTracker.lastCallState = state
     }
 }
