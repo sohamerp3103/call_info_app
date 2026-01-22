@@ -20,8 +20,10 @@ class PhoneCallReceiver : BroadcastReceiver() {
             CallDetailsStore.saveLastNumber(context, incomingNumber)
         }
 
+        val resolvedNumber = incomingNumber ?: CallDetailsStore.getLastNumber(context)
+
         val payload = mapOf(
-            CallIntentCache.EXTRA_PHONE_NUMBER to incomingNumber,
+            CallIntentCache.EXTRA_PHONE_NUMBER to resolvedNumber,
             CallIntentCache.EXTRA_CALL_STATE to state,
             CallIntentCache.EXTRA_TIMESTAMP to timestamp
         )
@@ -31,11 +33,11 @@ class PhoneCallReceiver : BroadcastReceiver() {
 
         when (state) {
             TelephonyManager.EXTRA_STATE_RINGING -> {
-                CallStateTracker.pendingNotificationWithoutNumber = incomingNumber.isNullOrEmpty()
-                if (!incomingNumber.isNullOrEmpty()) {
+                CallStateTracker.pendingNotificationWithoutNumber = resolvedNumber.isNullOrEmpty()
+                if (!resolvedNumber.isNullOrEmpty()) {
                     CallNotificationHelper.showCallerDetailsNotification(
                         context,
-                        incomingNumber,
+                        resolvedNumber,
                         state
                     )
                 }
