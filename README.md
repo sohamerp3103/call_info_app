@@ -11,6 +11,8 @@ API fallback.
 - Call log access is **optional** and only used if the user explicitly grants it.
 - Only minimal permissions: `READ_PHONE_STATE` (optional) and `POST_NOTIFICATIONS`.
 - If permissions are denied or numbers are unavailable, the app falls back to manual lookup.
+- Call detection is handled by a manifest-registered receiver so notifications can still be posted
+  even if the app process is killed.
 
 ## Project structure
 
