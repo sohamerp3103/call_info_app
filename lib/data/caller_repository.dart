@@ -9,11 +9,39 @@ class CallerRepository {
   CallerRepository({http.Client? client}) : _client = client ?? http.Client();
 
   final http.Client _client;
+  final List<CallerDetails> _mockCallers = const [
+    CallerDetails(
+      phoneNumber: '+15551234567',
+      name: 'Jordan Lee',
+      company: 'Northwind Logistics',
+      outstandingBalance: 2450.75,
+      notes: 'Awaiting invoice approval from finance.',
+    ),
+    CallerDetails(
+      phoneNumber: '+15559876543',
+      name: 'Riley Chen',
+      company: 'Contoso Health',
+      outstandingBalance: 0.0,
+      notes: 'Recently renewed contract. Follow up in Q3.',
+    ),
+    CallerDetails(
+      phoneNumber: '+447700900123',
+      name: 'Avery Patel',
+      company: 'Fabrikam Retail',
+      outstandingBalance: 810.0,
+      notes: 'Requested urgent callback about shipment delay.',
+    ),
+  ];
 
   Future<CallerDetails?> fetchCallerDetails(String phoneNumber) async {
     final local = await _fetchFromLocal(phoneNumber);
     if (local != null) {
       return local;
+    }
+
+    final mock = _fetchFromMock(phoneNumber);
+    if (mock != null) {
+      return mock;
     }
 
     return _fetchFromApi(phoneNumber);
@@ -29,10 +57,44 @@ class CallerRepository {
     );
 
     if (results.isEmpty) {
-      return null;
+      return _fetchFromMock(phoneNumber);
     }
 
     return CallerDetails.fromMap(results.first);
+  }
+
+  CallerDetails? _fetchFromMock(String phoneNumber) {
+    for (final caller in _mockCallers) {
+      if (_isSameNumber(caller.phoneNumber, phoneNumber)) {
+        return caller;
+      }
+    }
+    return null;
+  }
+
+  bool _isSameNumber(String a, String b) {
+    final normalizedA = _normalizeNumber(a);
+    final normalizedB = _normalizeNumber(b);
+    if (normalizedA.isEmpty || normalizedB.isEmpty) {
+      return false;
+    }
+    if (normalizedA == normalizedB) {
+      return true;
+    }
+    final minLength = 7;
+    final suffixLength = normalizedA.length < normalizedB.length
+        ? normalizedA.length
+        : normalizedB.length;
+    if (suffixLength < minLength) {
+      return false;
+    }
+    return normalizedA.substring(normalizedA.length - suffixLength) ==
+        normalizedB.substring(normalizedB.length - suffixLength);
+  }
+
+  String _normalizeNumber(String input) {
+    final digits = input.replaceAll(RegExp(r'\\D'), '');
+    return digits;
   }
 
   Future<CallerDetails?> _fetchFromApi(String phoneNumber) async {

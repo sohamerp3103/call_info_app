@@ -17,6 +17,14 @@ API fallback.
 - `lib/` – Flutter UI, repository pattern, Sqflite DB, and call event streams.
 - `android/` – Kotlin receiver + notification + Flutter channel integration.
 
+## Implementation sequence (breakdown)
+
+1. **Detect call events** via `PhoneCallReceiver` and confirm call state delivery to Flutter.
+2. **Resolve the phone number** and match it against a mock caller list (and local DB) to
+   display name/company/notes in the Caller Details screen.
+3. **Deep-link from notifications** into Flutter with the number for quick lookups.
+4. **Fallback to manual lookup** when the device cannot provide a number.
+
 ## Setup
 
 1. Install Flutter dependencies:
