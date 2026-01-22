@@ -72,6 +72,26 @@ class _HomeScreenState extends State<HomeScreen> {
     await _refreshPermissionStatus();
   }
 
+  Future<void> _requestPhonePermission() async {
+    await Permission.phone.request();
+    await _refreshPermissionStatus();
+  }
+
+  Future<void> _requestNotificationPermission() async {
+    await Permission.notification.request();
+    await _refreshPermissionStatus();
+  }
+
+  Future<void> _requestCallLogPermission() async {
+    await Permission.callLog.request();
+    await _refreshPermissionStatus();
+  }
+
+  Future<void> _openAppSettings() async {
+    await openAppSettings();
+    await _refreshPermissionStatus();
+  }
+
   void _openManualLookup() {
     final value = _manualNumberController.text.trim();
     if (value.isEmpty) {
@@ -95,6 +115,10 @@ class _HomeScreenState extends State<HomeScreen> {
             notificationStatus: _notificationStatus,
             callLogStatus: _callLogStatus,
             onRequest: _requestPermissions,
+            onRequestPhone: _requestPhonePermission,
+            onRequestNotification: _requestNotificationPermission,
+            onRequestCallLog: _requestCallLogPermission,
+            onOpenSettings: _openAppSettings,
           ),
           const SizedBox(height: 16),
           Card(
@@ -164,12 +188,20 @@ class _PermissionCard extends StatelessWidget {
     required this.notificationStatus,
     required this.callLogStatus,
     required this.onRequest,
+    required this.onRequestPhone,
+    required this.onRequestNotification,
+    required this.onRequestCallLog,
+    required this.onOpenSettings,
   });
 
   final PermissionStatus phoneStatus;
   final PermissionStatus notificationStatus;
   final PermissionStatus callLogStatus;
   final VoidCallback onRequest;
+  final VoidCallback onRequestPhone;
+  final VoidCallback onRequestNotification;
+  final VoidCallback onRequestCallLog;
+  final VoidCallback onOpenSettings;
 
   @override
   Widget build(BuildContext context) {
@@ -200,9 +232,31 @@ class _PermissionCard extends StatelessWidget {
             const SizedBox(height: 12),
             Text(statusText.join('\n')),
             const SizedBox(height: 12),
-            OutlinedButton(
-              onPressed: onRequest,
-              child: const Text('Grant permissions'),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                OutlinedButton(
+                  onPressed: onRequest,
+                  child: const Text('Grant all'),
+                ),
+                OutlinedButton(
+                  onPressed: onRequestPhone,
+                  child: const Text('Phone'),
+                ),
+                OutlinedButton(
+                  onPressed: onRequestNotification,
+                  child: const Text('Notifications'),
+                ),
+                OutlinedButton(
+                  onPressed: onRequestCallLog,
+                  child: const Text('Call log'),
+                ),
+                OutlinedButton(
+                  onPressed: onOpenSettings,
+                  child: const Text('Open settings'),
+                ),
+              ],
             ),
           ],
         ),
