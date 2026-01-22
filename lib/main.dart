@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'data/caller_repository.dart';
 import 'screens/caller_details_screen.dart';
+import 'screens/debug_log_screen.dart';
 import 'screens/home_screen.dart';
 import 'services/call_event_service.dart';
 
@@ -67,6 +68,9 @@ class _CallInfoAppState extends State<CallInfoApp> {
             onOpenCallerDetails: _openCallerDetails,
           ),
         );
+      },
+      routes: {
+        '/debug': (_) => const DebugLogScreen(),
       },
     );
   }

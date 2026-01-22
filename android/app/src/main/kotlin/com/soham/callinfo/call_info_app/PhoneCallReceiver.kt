@@ -21,6 +21,11 @@ class PhoneCallReceiver : BroadcastReceiver() {
         }
 
         var resolvedNumber = incomingNumber ?: CallDetailsStore.getLastNumber(context)
+        val initialSource = when {
+            !incomingNumber.isNullOrEmpty() -> "extra_incoming_number"
+            !resolvedNumber.isNullOrEmpty() -> "last_known_number"
+            else -> "missing"
+        }
 
         if (resolvedNumber.isNullOrEmpty() && state == TelephonyManager.EXTRA_STATE_IDLE) {
             resolvedNumber = CallLogLookup.getLastNumber(context)
@@ -28,6 +33,15 @@ class PhoneCallReceiver : BroadcastReceiver() {
                 CallDetailsStore.saveLastNumber(context, resolvedNumber)
             }
         }
+        val finalSource = when {
+            !incomingNumber.isNullOrEmpty() -> "extra_incoming_number"
+            !resolvedNumber.isNullOrEmpty() && state == TelephonyManager.EXTRA_STATE_IDLE ->
+                "call_log_lookup"
+            !resolvedNumber.isNullOrEmpty() -> "last_known_number"
+            else -> initialSource
+        }
+
+        CallEventLogStore.appendLog(context, state, resolvedNumber, finalSource)
 
         val payload = mapOf(
             CallIntentCache.EXTRA_PHONE_NUMBER to resolvedNumber,

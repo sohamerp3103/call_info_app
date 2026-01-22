@@ -27,6 +27,22 @@ API fallback.
 3. **Deep-link from notifications** into Flutter with the number for quick lookups.
 4. **Fallback to manual lookup** when the device cannot provide a number.
 
+## Debugging missing caller numbers
+
+If call events show **Number unavailable**, Android did not provide `EXTRA_INCOMING_NUMBER`.
+There are two possible paths:
+
+1. **Grant optional call log access** (`READ_CALL_LOG`). After the call ends, the receiver
+   reads the most recent call log entry and posts the notification with that number.
+2. **Manual lookup** (always available) by pasting the number into the Home screen.
+
+Use the **Debug Log** screen to inspect which source was used:
+
+- `extra_incoming_number` → system provided the number during ringing
+- `last_known_number` → app used the last saved number
+- `call_log_lookup` → app recovered the number from call log after the call ended
+- `missing` → no number was available from any source
+
 ## Setup
 
 1. Install Flutter dependencies:

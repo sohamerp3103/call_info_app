@@ -38,6 +38,20 @@ class MainActivity : FlutterActivity() {
             }
         }
 
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            "call_info/debug"
+        ).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "getCallLogs" -> result.success(CallEventLogStore.getLogs(this))
+                "clearCallLogs" -> {
+                    CallEventLogStore.clearLogs(this)
+                    result.success(true)
+                }
+                else -> result.notImplemented()
+            }
+        }
+
         CallIntentCache.consume()?.let { payload ->
             intentChannel?.invokeMethod("openCallerDetails", payload)
         }

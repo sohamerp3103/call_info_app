@@ -150,6 +150,12 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           const SizedBox(height: 16),
+          OutlinedButton.icon(
+            onPressed: () => Navigator.of(context).pushNamed('/debug'),
+            icon: const Icon(Icons.bug_report_outlined),
+            label: const Text('Open debug logs'),
+          ),
+          const SizedBox(height: 16),
           Text(
             'Recent call events',
             style: Theme.of(context).textTheme.titleMedium,
