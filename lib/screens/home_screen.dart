@@ -26,6 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   PermissionStatus _phoneStatus = PermissionStatus.denied;
   PermissionStatus _notificationStatus = PermissionStatus.denied;
+  PermissionStatus _callLogStatus = PermissionStatus.denied;
 
   @override
   void initState() {
@@ -51,17 +52,23 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _refreshPermissionStatus() async {
     final phone = await Permission.phone.status;
     final notification = await Permission.notification.status;
+    final callLog = await Permission.callLog.status;
 
     if (mounted) {
       setState(() {
         _phoneStatus = phone;
         _notificationStatus = notification;
+        _callLogStatus = callLog;
       });
     }
   }
 
   Future<void> _requestPermissions() async {
-    await [Permission.phone, Permission.notification].request();
+    await [
+      Permission.phone,
+      Permission.notification,
+      Permission.callLog,
+    ].request();
     await _refreshPermissionStatus();
   }
 
@@ -86,6 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
           _PermissionCard(
             phoneStatus: _phoneStatus,
             notificationStatus: _notificationStatus,
+            callLogStatus: _callLogStatus,
             onRequest: _requestPermissions,
           ),
           const SizedBox(height: 16),
@@ -154,11 +162,13 @@ class _PermissionCard extends StatelessWidget {
   const _PermissionCard({
     required this.phoneStatus,
     required this.notificationStatus,
+    required this.callLogStatus,
     required this.onRequest,
   });
 
   final PermissionStatus phoneStatus;
   final PermissionStatus notificationStatus;
+  final PermissionStatus callLogStatus;
   final VoidCallback onRequest;
 
   @override
@@ -166,6 +176,7 @@ class _PermissionCard extends StatelessWidget {
     final statusText = <String>[];
     statusText.add('Phone permission: ${phoneStatus.name}');
     statusText.add('Notification permission: ${notificationStatus.name}');
+    statusText.add('Call log permission: ${callLogStatus.name}');
 
     return Card(
       color: Theme.of(context).colorScheme.surfaceContainerHighest,
@@ -181,8 +192,10 @@ class _PermissionCard extends StatelessWidget {
             const SizedBox(height: 8),
             const Text(
               'To detect call state changes we request the Phone permission. '
-              'This app does not draw overlays or access call logs. '
-              'If permissions are denied, you can still use manual lookup.',
+              'If the system does not expose caller numbers, you can grant '
+              'Call Log access to resolve the most recent caller after the call '
+              'ends. The app does not draw overlays. Manual lookup is always '
+              'available if permissions are denied.',
             ),
             const SizedBox(height: 12),
             Text(statusText.join('\n')),

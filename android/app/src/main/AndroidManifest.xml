@@ -4,6 +4,9 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- Optional: enable call log lookup when the user explicitly grants it. -->
+    <uses-permission android:name="android.permission.READ_CALL_LOG" />
+
     <application
         android:label="call_info_app"
         android:name="${applicationName}"
@@ -30,7 +33,7 @@
             </intent-filter>
         </activity>
 
-        <!-- 📡 Call state receiver (no overlays, no call log access). -->
+        <!-- 📡 Call state receiver (no overlays, no call log access without permission). -->
         <receiver
             android:name=".PhoneCallReceiver"
             android:enabled="true"

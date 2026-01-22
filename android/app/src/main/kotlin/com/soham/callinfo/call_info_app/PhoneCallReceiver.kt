@@ -20,7 +20,14 @@ class PhoneCallReceiver : BroadcastReceiver() {
             CallDetailsStore.saveLastNumber(context, incomingNumber)
         }
 
-        val resolvedNumber = incomingNumber ?: CallDetailsStore.getLastNumber(context)
+        var resolvedNumber = incomingNumber ?: CallDetailsStore.getLastNumber(context)
+
+        if (resolvedNumber.isNullOrEmpty() && state == TelephonyManager.EXTRA_STATE_IDLE) {
+            resolvedNumber = CallLogLookup.getLastNumber(context)
+            if (!resolvedNumber.isNullOrEmpty()) {
+                CallDetailsStore.saveLastNumber(context, resolvedNumber)
+            }
+        }
 
         val payload = mapOf(
             CallIntentCache.EXTRA_PHONE_NUMBER to resolvedNumber,

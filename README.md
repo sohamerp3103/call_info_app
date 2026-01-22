@@ -8,7 +8,7 @@ API fallback.
 ## ✅ Play policy-friendly behavior
 
 - No overlays (`SYSTEM_ALERT_WINDOW` removed).
-- No call log access (`READ_CALL_LOG` removed).
+- Call log access is **optional** and only used if the user explicitly grants it.
 - Only minimal permissions: `READ_PHONE_STATE` (optional) and `POST_NOTIFICATIONS`.
 - If permissions are denied or numbers are unavailable, the app falls back to manual lookup.
 
@@ -34,6 +34,8 @@ API fallback.
 2. Ensure Android permissions are declared:
    - `READ_PHONE_STATE` for call state access
    - `POST_NOTIFICATIONS` for Android 13+
+   - `READ_CALL_LOG` (optional) to read the latest call log entry if the system does not provide
+     numbers via `EXTRA_INCOMING_NUMBER`
 3. Run on an Android device/emulator:
    ```bash
    flutter run
